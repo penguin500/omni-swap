@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OmniSeed AI - Solana Swap | Trade Any Token</title>
+<meta name="description" content="Swap any Solana token instantly. Powered by Jupiter. Best prices, lowest slippage.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --card: #111118;
+  --card2: #16161f;
+  --border: #1e1e2e;
+  --accent: #00ff88;
+  --accent2: #00d4ff;
+  --purple: #9945ff;
+  --green: #14f195;
+  --text: #e4e4e8;
+  --dim: #6b6b80;
+  --danger: #ff4466;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+/* Animated background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at 20% 50%, #9945ff08 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 20%, #00ff8808 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, #00d4ff06 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 20px; font-weight: 900; letter-spacing: 1px;
+}
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--purple), var(--green));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: #fff;
+}
+.logo span { color: var(--accent); }
+.nav-links { display: flex; gap: 24px; align-items: center; }
+.nav-links a { color: var(--dim); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+#connectBtn {
+  background: linear-gradient(135deg, var(--purple), #7b3fe4);
+  color: #fff; border: none; padding: 10px 24px; border-radius: 12px;
+  font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
+}
+#connectBtn:hover { transform: translateY(-1px); filter: brightness(1.15); }
+#connectBtn.connected { background: linear-gradient(135deg, var(--accent), #00aa55); }
+
+/* MAIN */
+main {
+  position: relative; z-index: 1;
+  max-width: 480px; margin: 100px auto 40px; padding: 0 16px;
+}
+.hero {
+  text-align: center; margin-bottom: 32px;
+}
+.hero h1 {
+  font-size: 36px; font-weight: 900; letter-spacing: -1px;
+  background: linear-gradient(135deg, #fff, var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+.hero p { color: var(--dim); font-size: 14px; }
+
+/* SWAP CARD */
+.swap-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.swap-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.swap-header h2 { font-size: 18px; font-weight: 800; }
+.settings-btn {
+  background: var(--card2); border: 1px solid var(--border);
+  color: var(--dim); padding: 8px 12px; border-radius: 8px;
+  font-size: 12px; cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
+}
+.settings-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+/* TOKEN INPUT */
+.token-box {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+.token-box:focus-within { border-color: var(--accent2); }
+.token-box-label { font-size: 11px; color: var(--dim); margin-bottom: 8px; display: block; }
+.token-box-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.token-amount {
+  background: none; border: none; color: var(--text);
+  font-size: 28px; font-weight: 700; font-family: inherit;
+  width: 100%; outline: none;
+}
+.token-amount::placeholder { color: #333; }
+.token-selector {
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--text); padding: 8px 14px; border-radius: 10px;
+  font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  transition: all 0.2s;
+}
+.token-selector:hover { border-color: var(--purple); }
+.token-icon {
+  width: 22px; height: 22px; border-radius: 50%;
+}
+.token-balance { font-size: 11px; color: var(--dim); margin-top: 6px; text-align: right; }
+.token-balance span { color: var(--accent2); cursor: pointer; font-weight: 600; }
+
+/* SWAP ARROW */
+.swap-arrow-wrap {
+  display: flex; justify-content: center; margin: -4px 0;
+  position: relative; z-index: 2;
+}
+.swap-arrow {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: var(--card); border: 3px solid var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; transition: all 0.2s;
+  color: var(--accent2);
+}
+.swap-arrow:hover { transform: rotate(180deg); background: var(--accent2); color: var(--bg); }
+
+/* PRICE INFO */
+.price-info {
+  background: var(--card2); border-radius: 10px; padding: 12px;
+  margin: 16px 0; font-size: 12px;
+}
+.price-row { display: flex; justify-content: space-between; padding: 3px 0; color: var(--dim); }
+.price-row .val { color: var(--text); font-weight: 600; }
+
+/* SWAP BUTTON */
+#swapBtn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--purple), #6b2fd4);
+  color: #fff; border: none; padding: 18px;
+  border-radius: 14px; font-size: 16px; font-weight: 800;
+  cursor: pointer; font-family: inherit; letter-spacing: 0.5px;
+  transition: all 0.2s;
+}
+#swapBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px #9945ff44; }
+#swapBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+#swapBtn.loading { background: var(--card2); color: var(--dim); }
+
+/* FEE BADGE */
+.fee-badge {
+  text-align: center; margin-top: 12px; font-size: 11px; color: var(--dim);
+}
+.fee-badge a { color: var(--accent); text-decoration: none; }
+
+/* STATS BAR */
+.stats-bar {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+  margin-top: 24px;
+}
+.stat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px; text-align: center;
+}
+.stat-card .label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+.stat-card .value { font-size: 22px; font-weight: 900; color: var(--accent); margin-top: 4px; }
+
+/* SLIPPAGE MODAL */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 200;
+  justify-content: center; align-items: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 24px; width: 90%; max-width: 400px;
+}
+.modal h3 { margin-bottom: 16px; font-size: 16px; }
+.slip-options { display: flex; gap: 8px; margin-bottom: 12px; }
+.slip-btn {
+  flex: 1; background: var(--card2); border: 1px solid var(--border);
+  color: var(--text); padding: 10px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+}
+.slip-btn.active, .slip-btn:hover { border-color: var(--accent); color: var(--accent); background: #00ff8811; }
+.slip-custom {
+  width: 100%; background: var(--card2); border: 1px solid var(--border);
+  color: var(--text); padding: 12px; border-radius: 10px;
+  font-size: 14px; font-family: inherit; outline: none;
+}
+.slip-custom:focus { border-color: var(--accent2); }
+
+/* RECENT TRADES */
+.recent-trades {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px; margin-top: 16px;
+}
+.recent-trades h3 { font-size: 14px; color: var(--dim); margin-bottom: 12px; }
+.trade-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.trade-row:last-child { border-bottom: none; }
+
+/* FOOTER */
+footer {
+  text-align: center; padding: 40px 16px 20px;
+  font-size: 11px; color: #333;
+}
+footer a { color: var(--accent); text-decoration: none; }
+
+@media (max-width: 520px) {
+  main { margin-top: 80px; }
+  .hero h1 { font-size: 28px; }
+  .token-amount { font-size: 22px; }
+  .stats-bar { grid-template-columns: 1fr; }
+}
+
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-spin { animation: spin 1s linear infinite; display: inline-block; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-icon">O</div>
+    OmniSeed<span>AI</span>
+  </div>
+  <div class="nav-links">
+    <a href="#swap">Swap</a>
+    <a href="https://omniseedai.com" target="_blank">Home</a>
+    <button id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>Swap Any Token</h1>
+    <p>Best prices on Solana. Powered by Jupiter aggregator.</p>
+  </div>
+
+  <div class="swap-card" id="swap">
+    <div class="swap-header">
+      <h2>Swap</h2>
+      <button class="settings-btn" onclick="openSlippage()">Slippage: <span id="slipDisplay">0.5</span>%</button>
+    </div>
+
+    <!-- FROM -->
+    <div class="token-box">
+      <span class="token-box-label">You Pay</span>
+      <div class="token-box-row">
+        <input class="token-amount" id="fromAmount" type="number" placeholder="0.0" step="any" oninput="onAmountChange()">
+        <button class="token-selector" id="fromToken" onclick="selectToken('from')">
+          <img class="token-icon" src="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png" onerror="this.style.display='none'">
+          SOL
+        </button>
+      </div>
+      <div class="token-balance" id="fromBalance"></div>
+    </div>
+
+    <!-- ARROW -->
+    <div class="swap-arrow-wrap">
+      <div class="swap-arrow" onclick="swapTokens()">&#8645;</div>
+    </div>
+
+    <!-- TO -->
+    <div class="token-box">
+      <span class="token-box-label">You Receive</span>
+      <div class="token-box-row">
+        <input class="token-amount" id="toAmount" type="number" placeholder="0.0" readonly>
+        <button class="token-selector" id="toToken" onclick="selectToken('to')">
+          <img class="token-icon" src="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png" onerror="this.style.display='none'">
+          USDC
+        </button>
+      </div>
+    </div>
+
+    <!-- PRICE INFO -->
+    <div class="price-info" id="priceInfo" style="display:none;">
+      <div class="price-row"><span>Rate</span><span class="val" id="rateDisplay">-</span></div>
+      <div class="price-row"><span>Price Impact</span><span class="val" id="impactDisplay">-</span></div>
+      <div class="price-row"><span>Minimum Received</span><span class="val" id="minReceived">-</span></div>
+      <div class="price-row"><span>Network Fee</span><span class="val" id="networkFee">~0.0005 SOL</span></div>
+      <div class="price-row"><span>Platform Fee</span><span class="val" style="color:var(--accent);">0.5%</span></div>
+    </div>
+
+    <!-- SWAP BUTTON -->
+    <button id="swapBtn" onclick="executeSwap()" disabled>Connect Wallet to Swap</button>
+
+    <div class="fee-badge">
+      Powered by <a href="https://jup.ag" target="_blank">Jupiter</a> | OmniSeed AI earns 0.5% on swaps
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="label">Total Volume</div>
+      <div class="value" id="statVolume">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Swaps</div>
+      <div class="value" id="statSwaps">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Fees Earned</div>
+      <div class="value" id="statFees">$0</div>
+    </div>
+  </div>
+
+  <!-- RECENT TRADES -->
+  <div class="recent-trades" id="recentTrades" style="display:none;">
+    <h3>Your Recent Swaps</h3>
+    <div id="tradesList"></div>
+  </div>
+</main>
+
+<!-- SLIPPAGE MODAL -->
+<div class="modal-overlay" id="slippageModal">
+  <div class="modal">
+    <h3>Slippage Tolerance</h3>
+    <div class="slip-options">
+      <button class="slip-btn active" onclick="setSlippage(0.5, this)">0.5%</button>
+      <button class="slip-btn" onclick="setSlippage(1, this)">1%</button>
+      <button class="slip-btn" onclick="setSlippage(3, this)">3%</button>
+      <button class="slip-btn" onclick="setSlippage(5, this)">5%</button>
+    </div>
+    <input class="slip-custom" type="number" placeholder="Custom %" step="0.1" id="customSlip" oninput="setSlippage(parseFloat(this.value))">
+    <button style="width:100%;margin-top:12px;background:var(--accent);color:#000;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="closeSlippage()">Done</button>
+  </div>
+</div>
+
+<footer>
+  <p>OmniSeed AI &copy; 2026 | <a href="https://omniseedai.com">omniseedai.com</a></p>
+  <p style="margin-top:4px;">Trades are routed through Jupiter aggregator for best prices.</p>
+</footer>
+
+<!-- Solana Web3.js MUST load before our script -->
+<script src="https://unpkg.com/@solana/web3.js@1.95.8/lib/index.iife.min.js"></script>
+<!-- Buffer polyfill for ATA derivation -->
+<script src="https://unpkg.com/buffer@6.0.3/index.js"></script>
+
+<script>
+// ============================================================
+// OmniSeed AI Swap v2 -- Jupiter Powered with Platform Fee
+// Fee wallet: 4CaTPEr4k17fsb6reefxRSaFg4jDUnSe29by3qpERZPn
+// FIXED: Proper ATA derivation for feeAccount, load order, tx signing
+// ============================================================
+
+const FEE_WALLET = "4CaTPEr4k17fsb6reefxRSaFg4jDUnSe29by3qpERZPn";
+const PLATFORM_FEE_BPS = 50; // 0.5% platform fee on every swap
+const SOL_MINT = "So11111111111111111111111111111111111111112";
+const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+// SPL programs for ATA derivation
+const TOKEN_PROGRAM_ID = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+const TOKEN_2022_PROGRAM_ID = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+const ATA_PROGRAM_ID = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+
+let walletConnected = false;
+let walletPubkey = null;
+let slippageBps = 50; // 0.5%
+let currentQuote = null;
+let fromMint = SOL_MINT;
+let toMint = USDC_MINT;
+let fromSymbol = "SOL";
+let toSymbol = "USDC";
+let fromDecimals = 9;
+let toDecimals = 6;
+let swapCount = 0;
+let totalVolume = 0;
+let totalFees = 0;
+let recentSwaps = [];
+
+// Popular tokens for quick select
+const POPULAR_TOKENS = {
+  "SOL": { mint: SOL_MINT, decimals: 9, icon: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png" },
+  "USDC": { mint: USDC_MINT, decimals: 6, icon: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png" },
+  "USDT": { mint: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", decimals: 6, icon: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.svg" },
+  "JUP": { mint: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN", decimals: 6, icon: "https://static.jup.ag/jup/icon.png" },
+  "BONK": { mint: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", decimals: 5, icon: "https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I" },
+  "WIF": { mint: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm", decimals: 6, icon: "https://bafkreibk3covs5ltyqxa272uodhber53csmtq7y2toc7wabt7haq4n33oa.ipfs.nftstorage.link" },
+  "RAY": { mint: "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R", decimals: 6, icon: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png" },
+  "PYTH": { mint: "HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3", decimals: 6, icon: "https://pyth.network/token.svg" },
+};
+
+// ============================================================
+// ATA DERIVATION -- Critical for Jupiter fee collection
+// Jupiter requires feeAccount to be the ATA of fee wallet
+// for the OUTPUT token mint, NOT the raw wallet address
+// ============================================================
+async function deriveFeeAccount(outputMint) {
+  // If output is SOL (native), Jupiter wraps/unwraps, no fee account needed
+  // Jupiter handles SOL output fees differently -- use the wallet directly
+  if (outputMint === SOL_MINT) {
+    return FEE_WALLET;
+  }
+
+  try {
+    const { PublicKey } = solanaWeb3;
+    const feeWalletPk = new PublicKey(FEE_WALLET);
+    const mintPk = new PublicKey(outputMint);
+    const tokenProgramPk = new PublicKey(TOKEN_PROGRAM_ID);
+    const ataProgramPk = new PublicKey(ATA_PROGRAM_ID);
+
+    // Derive ATA: PDA seeds = [wallet, TOKEN_PROGRAM_ID, mint]
+    const [ata] = PublicKey.findProgramAddressSync(
+      [feeWalletPk.toBytes(), tokenProgramPk.toBytes(), mintPk.toBytes()],
+      ataProgramPk
+    );
+    console.log(`Fee ATA for ${outputMint.substring(0,8)}...: ${ata.toBase58()}`);
+    return ata.toBase58();
+  } catch (e) {
+    console.warn('ATA derivation failed, trying Token-2022:', e);
+    // Try Token-2022 program
+    try {
+      const { PublicKey } = solanaWeb3;
+      const feeWalletPk = new PublicKey(FEE_WALLET);
+      const mintPk = new PublicKey(outputMint);
+      const token2022Pk = new PublicKey(TOKEN_2022_PROGRAM_ID);
+      const ataProgramPk = new PublicKey(ATA_PROGRAM_ID);
+
+      const [ata] = PublicKey.findProgramAddressSync(
+        [feeWalletPk.toBytes(), token2022Pk.toBytes(), mintPk.toBytes()],
+        ataProgramPk
+      );
+      return ata.toBase58();
+    } catch (e2) {
+      console.error('ATA derivation completely failed:', e2);
+      return FEE_WALLET; // Fallback
+    }
+  }
+}
+
+// ============================================================
+// CONNECT WALLET
+// ============================================================
+async function connectWallet() {
+  if (walletConnected) {
+    walletConnected = false;
+    walletPubkey = null;
+    document.getElementById('connectBtn').textContent = 'Connect Wallet';
+    document.getElementById('connectBtn').classList.remove('connected');
+    document.getElementById('swapBtn').disabled = true;
+    document.getElementById('swapBtn').textContent = 'Connect Wallet to Swap';
+    document.getElementById('fromBalance').innerHTML = '';
+    return;
+  }
+
+  try {
+    // Check for multiple wallet providers
+    const provider = window.phantom?.solana || window.solana;
+    if (!provider?.isPhantom) {
+      window.open('https://phantom.app/', '_blank');
+      alert('Please install Phantom wallet!');
+      return;
+    }
+    const resp = await provider.connect();
+    walletPubkey = resp.publicKey.toString();
+    walletConnected = true;
+
+    const btn = document.getElementById('connectBtn');
+    btn.textContent = walletPubkey.substring(0,4) + '...' + walletPubkey.substring(walletPubkey.length-4);
+    btn.classList.add('connected');
+
+    document.getElementById('swapBtn').disabled = false;
+    document.getElementById('swapBtn').textContent = 'Swap';
+
+    updateBalance();
+  } catch (e) {
+    console.error('Wallet connect error:', e);
+    if (e.code === 4001) {
+      // User rejected
+    } else {
+      alert('Failed to connect wallet. Please try again.');
+    }
+  }
+}
+
+// ============================================================
+// GET BALANCE (supports SOL and SPL tokens)
+// ============================================================
+async function updateBalance() {
+  if (!walletPubkey) return;
+  const el = document.getElementById('fromBalance');
+
+  try {
+    if (fromMint === SOL_MINT) {
+      const r = await fetch('https://api.mainnet-beta.solana.com', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({jsonrpc:'2.0',id:1,method:'getBalance',params:[walletPubkey]})
+      });
+      const data = await r.json();
+      const sol = (data.result?.value || 0) / 1e9;
+      el.innerHTML = `Balance: ${sol.toFixed(4)} SOL <span onclick="document.getElementById('fromAmount').value=${(sol*0.95).toFixed(6)};onAmountChange();">MAX</span>`;
+    } else {
+      // SPL token balance
+      const r = await fetch('https://api.mainnet-beta.solana.com', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({jsonrpc:'2.0',id:1,method:'getTokenAccountsByOwner',params:[
+          walletPubkey,
+          {mint: fromMint},
+          {encoding:'jsonParsed'}
+        ]})
+      });
+      const data = await r.json();
+      const accounts = data.result?.value || [];
+      if (accounts.length > 0) {
+        const info = accounts[0].account.data.parsed.info;
+        const bal = parseFloat(info.tokenAmount.uiAmountString || '0');
+        el.innerHTML = `Balance: ${bal.toFixed(4)} ${fromSymbol} <span onclick="document.getElementById('fromAmount').value=${bal.toFixed(fromDecimals)};onAmountChange();">MAX</span>`;
+      } else {
+        el.innerHTML = `Balance: 0 ${fromSymbol}`;
+      }
+    }
+  } catch(e) {
+    console.error('Balance error:', e);
+  }
+}
+
+// ============================================================
+// GET QUOTE
+// ============================================================
+let quoteTimeout = null;
+async function onAmountChange() {
+  clearTimeout(quoteTimeout);
+  const amt = parseFloat(document.getElementById('fromAmount').value);
+  if (!amt || amt <= 0) {
+    document.getElementById('toAmount').value = '';
+    document.getElementById('priceInfo').style.display = 'none';
+    currentQuote = null;
+    return;
+  }
+  quoteTimeout = setTimeout(() => getQuote(amt), 400);
+}
+
+async function getQuote(amount) {
+  const btn = document.getElementById('swapBtn');
+  if (walletConnected) btn.textContent = 'Getting quote...';
+
+  try {
+    const amountRaw = Math.floor(amount * (10 ** fromDecimals));
+    const url = `https://api.jup.ag/swap/v1/quote?inputMint=${fromMint}&outputMint=${toMint}&amount=${amountRaw}&slippageBps=${slippageBps}&platformFeeBps=${PLATFORM_FEE_BPS}`;
+    const r = await fetch(url);
+    if (!r.ok) {
+      console.error('Quote API error:', r.status);
+      if (walletConnected) btn.textContent = 'Swap';
+      return;
+    }
+    const quote = await r.json();
+    currentQuote = quote;
+
+    const outAmount = parseInt(quote.outAmount) / (10 ** toDecimals);
+    document.getElementById('toAmount').value = outAmount.toFixed(toDecimals > 6 ? 8 : 6);
+
+    // Price info
+    const rate = outAmount / amount;
+    const impact = parseFloat(quote.priceImpactPct || 0);
+    const minOut = parseInt(quote.otherAmountThreshold || quote.outAmount) / (10 ** toDecimals);
+
+    document.getElementById('rateDisplay').textContent = `1 ${fromSymbol} = ${rate.toFixed(6)} ${toSymbol}`;
+    document.getElementById('impactDisplay').textContent = `${impact.toFixed(3)}%`;
+    document.getElementById('impactDisplay').style.color = impact > 1 ? 'var(--danger)' : impact > 0.3 ? '#ffaa00' : 'var(--accent)';
+    document.getElementById('minReceived').textContent = `${minOut.toFixed(6)} ${toSymbol}`;
+    document.getElementById('priceInfo').style.display = 'block';
+
+    if (walletConnected) btn.textContent = 'Swap';
+
+  } catch(e) {
+    console.error('Quote error:', e);
+    if (walletConnected) btn.textContent = 'Swap';
+  }
+}
+
+// ============================================================
+// EXECUTE SWAP -- with proper ATA fee account
+// ============================================================
+async function executeSwap() {
+  if (!walletConnected || !currentQuote) return;
+
+  const btn = document.getElementById('swapBtn');
+  btn.disabled = true;
+  btn.textContent = 'Preparing swap...';
+  btn.classList.add('loading');
+
+  try {
+    // CRITICAL: Derive the proper ATA for the output token
+    // Jupiter needs feeAccount = ATA of FEE_WALLET for the output mint
+    const feeAccount = await deriveFeeAccount(toMint);
+    console.log('Using feeAccount:', feeAccount);
+
+    btn.textContent = 'Building transaction...';
+
+    // Build swap transaction with platform fee
+    const swapBody = {
+      quoteResponse: currentQuote,
+      userPublicKey: walletPubkey,
+      wrapAndUnwrapSol: true,
+      dynamicComputeUnitLimit: true,
+      prioritizationFeeLamports: {
+        priorityLevelWithMaxLamports: {
+          maxLamports: 2000000,
+          global: false,
+          priorityLevel: "medium"
+        }
+      },
+      feeAccount: feeAccount,
+    };
+
+    const swapResp = await fetch('https://api.jup.ag/swap/v1/swap', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(swapBody)
+    });
+
+    if (!swapResp.ok) {
+      const errText = await swapResp.text();
+      console.error('Swap API error:', errText);
+      // If fee account fails, retry WITHOUT fee account (better to swap than fail)
+      if (errText.includes('feeAccount') || errText.includes('fee')) {
+        console.warn('Fee account rejected, retrying without fee...');
+        delete swapBody.feeAccount;
+        const retryResp = await fetch('https://api.jup.ag/swap/v1/swap', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(swapBody)
+        });
+        if (!retryResp.ok) throw new Error('Swap API failed even without fee');
+        var swapData = await retryResp.json();
+      } else {
+        throw new Error('Swap API failed: ' + errText.substring(0, 200));
+      }
+    } else {
+      var swapData = await swapResp.json();
+    }
+
+    const txBase64 = swapData.swapTransaction;
+    if (!txBase64) throw new Error('No transaction returned');
+
+    btn.textContent = 'Approve in wallet...';
+
+    // Deserialize transaction using solanaWeb3
+    const txBytes = Uint8Array.from(atob(txBase64), c => c.charCodeAt(0));
+    const transaction = solanaWeb3.VersionedTransaction.deserialize(txBytes);
+
+    // Use Phantom's signAndSendTransaction for best UX
+    const provider = window.phantom?.solana || window.solana;
+    const { signature } = await provider.signAndSendTransaction(transaction, {
+      skipPreflight: false,
+      preflightCommitment: "confirmed",
+      maxRetries: 3,
+    });
+
+    btn.textContent = 'Confirming...';
+    console.log('TX submitted:', signature);
+
+    // Wait for confirmation (up to 30s)
+    const connection = new solanaWeb3.Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+    try {
+      await connection.confirmTransaction(signature, 'confirmed');
+      console.log('TX confirmed!');
+    } catch (confErr) {
+      console.warn('Confirmation timeout, tx may still confirm:', confErr);
+    }
+
+    // Track stats
+    const fromAmt = parseFloat(document.getElementById('fromAmount').value);
+    const toAmt = parseFloat(document.getElementById('toAmount').value);
+    swapCount++;
+    const swapValueUsd = fromAmt * (fromMint === SOL_MINT ? 135 : 1);
+    totalVolume += swapValueUsd;
+    totalFees += swapValueUsd * 0.005; // 0.5% of this swap's value
+    updateStats();
+    saveStats();
+
+    // Add to recent swaps
+    recentSwaps.unshift({
+      from: fromSymbol, to: toSymbol,
+      fromAmt: fromAmt.toFixed(4), toAmt: toAmt.toFixed(4),
+      time: new Date().toLocaleTimeString(),
+      sig: signature,
+    });
+    updateRecentTrades();
+
+    btn.textContent = 'Swap Successful!';
+    btn.style.background = 'linear-gradient(135deg, var(--accent), #00aa55)';
+    setTimeout(() => {
+      btn.textContent = 'Swap';
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      btn.style.background = '';
+      updateBalance();
+      document.getElementById('fromAmount').value = '';
+      document.getElementById('toAmount').value = '';
+      document.getElementById('priceInfo').style.display = 'none';
+      currentQuote = null;
+    }, 2500);
+
+  } catch(e) {
+    console.error('Swap error:', e);
+    const msg = e.message || 'Unknown error';
+    btn.textContent = msg.includes('User rejected') ? 'Swap Cancelled' : 'Swap Failed - Try Again';
+    btn.style.background = msg.includes('User rejected')
+      ? 'linear-gradient(135deg, #555, #333)'
+      : 'linear-gradient(135deg, var(--danger), #cc0022)';
+    setTimeout(() => {
+      btn.textContent = 'Swap';
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      btn.style.background = '';
+    }, 2500);
+  }
+}
+
+// ============================================================
+// SWAP DIRECTION
+// ============================================================
+function swapTokens() {
+  [fromMint, toMint] = [toMint, fromMint];
+  [fromSymbol, toSymbol] = [toSymbol, fromSymbol];
+  [fromDecimals, toDecimals] = [toDecimals, fromDecimals];
+  document.getElementById('fromToken').innerHTML = `<img class="token-icon" src="${POPULAR_TOKENS[fromSymbol]?.icon||''}" onerror="this.style.display='none'"> ${fromSymbol}`;
+  document.getElementById('toToken').innerHTML = `<img class="token-icon" src="${POPULAR_TOKENS[toSymbol]?.icon||''}" onerror="this.style.display='none'"> ${toSymbol}`;
+  document.getElementById('fromAmount').value = '';
+  document.getElementById('toAmount').value = '';
+  document.getElementById('priceInfo').style.display = 'none';
+  currentQuote = null;
+  updateBalance();
+}
+
+// ============================================================
+// TOKEN SELECTOR -- proper modal with search
+// ============================================================
+function selectToken(side) {
+  // Build token picker modal
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay show';
+  overlay.style.zIndex = '300';
+  overlay.innerHTML = `
+    <div class="modal" style="max-height:80vh;overflow:hidden;display:flex;flex-direction:column;">
+      <h3 style="margin-bottom:12px;">Select Token</h3>
+      <input class="slip-custom" type="text" placeholder="Search by name or paste mint address..." id="tokenSearch" autofocus style="margin-bottom:12px;">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+        ${Object.keys(POPULAR_TOKENS).map(s => `
+          <button class="slip-btn" style="flex:0 0 auto;padding:6px 12px;" onclick="pickToken('${side}','${s}','${POPULAR_TOKENS[s].mint}',${POPULAR_TOKENS[s].decimals})">${s}</button>
+        `).join('')}
+      </div>
+      <div id="tokenSearchResults" style="overflow-y:auto;max-height:300px;"></div>
+      <button style="width:100%;margin-top:12px;background:var(--card2);border:1px solid var(--border);color:var(--dim);padding:12px;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  // Search by mint address
+  const searchInput = overlay.querySelector('#tokenSearch');
+  let searchTimer;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const val = searchInput.value.trim();
+    if (val.length >= 32) {
+      // Looks like a mint address
+      searchTimer = setTimeout(async () => {
+        const results = document.getElementById('tokenSearchResults');
+        results.innerHTML = '<div style="padding:12px;color:var(--dim);text-align:center;"><span class="loading-spin">~</span> Looking up token...</div>';
+        try {
+          const r = await fetch(`https://api.dexscreener.com/tokens/v1/solana/${val}`, {timeout: 5000});
+          const pairs = await r.json();
+          if (pairs && Array.isArray(pairs) && pairs.length > 0) {
+            const token = pairs[0].baseToken;
+            const price = pairs[0].priceUsd || '?';
+            results.innerHTML = `
+              <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;display:flex;align-items:center;gap:10px;" onclick="pickToken('${side}','${token.symbol}','${token.address}',${pairs[0].baseToken?.decimals || 6})">
+                <img src="${pairs[0].info?.imageUrl || ''}" style="width:32px;height:32px;border-radius:50%;" onerror="this.style.display='none'">
+                <div>
+                  <div style="font-weight:700;">${token.symbol}</div>
+                  <div style="font-size:11px;color:var(--dim);">${token.name} | $${price}</div>
+                  <div style="font-size:10px;color:var(--dim);">${val.substring(0,20)}...</div>
+                </div>
+              </div>
+            `;
+          } else {
+            results.innerHTML = `
+              <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;" onclick="pickToken('${side}','${val.substring(0,4)}...','${val}',6)">
+                <div style="font-weight:700;">Unknown Token</div>
+                <div style="font-size:11px;color:var(--dim);">Click to use anyway: ${val.substring(0,20)}...</div>
+              </div>
+            `;
+          }
+        } catch(e) {
+          results.innerHTML = `
+            <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;" onclick="pickToken('${side}','${val.substring(0,4)}...','${val}',6)">
+              <div style="font-weight:700;">Use Mint Address</div>
+              <div style="font-size:11px;color:var(--dim);">${val.substring(0,30)}...</div>
+            </div>
+          `;
+        }
+      }, 500);
+    }
+  });
+}
+
+function pickToken(side, symbol, mint, decimals) {
+  // Remove any open token picker
+  document.querySelectorAll('.modal-overlay').forEach(m => { if (m.style.zIndex === '300') m.remove(); });
+
+  if (side === 'from') {
+    fromMint = mint; fromSymbol = symbol; fromDecimals = decimals;
+    document.getElementById('fromToken').innerHTML = `<img class="token-icon" src="${POPULAR_TOKENS[symbol]?.icon||''}" onerror="this.style.display='none'"> ${symbol}`;
+  } else {
+    toMint = mint; toSymbol = symbol; toDecimals = decimals;
+    document.getElementById('toToken').innerHTML = `<img class="token-icon" src="${POPULAR_TOKENS[symbol]?.icon||''}" onerror="this.style.display='none'"> ${symbol}`;
+  }
+  onAmountChange();
+  updateBalance();
+}
+
+// ============================================================
+// SLIPPAGE
+// ============================================================
+function openSlippage() { document.getElementById('slippageModal').classList.add('show'); }
+function closeSlippage() { document.getElementById('slippageModal').classList.remove('show'); }
+function setSlippage(pct, btn) {
+  if (!pct || pct <= 0) return;
+  slippageBps = Math.round(pct * 100);
+  document.getElementById('slipDisplay').textContent = pct;
+  if (btn) {
+    document.querySelectorAll('.slip-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  onAmountChange();
+}
+
+// ============================================================
+// STATS -- persist to localStorage
+// ============================================================
+function loadStats() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('omniseed_swap_stats') || '{}');
+    swapCount = saved.swapCount || 0;
+    totalVolume = saved.totalVolume || 0;
+    totalFees = saved.totalFees || 0;
+    recentSwaps = saved.recentSwaps || [];
+    updateStats();
+    updateRecentTrades();
+  } catch(e) {}
+}
+
+function saveStats() {
+  try {
+    localStorage.setItem('omniseed_swap_stats', JSON.stringify({
+      swapCount, totalVolume, totalFees,
+      recentSwaps: recentSwaps.slice(0, 20),
+    }));
+  } catch(e) {}
+}
+
+function updateStats() {
+  document.getElementById('statVolume').textContent = totalVolume > 1000 ? '$' + (totalVolume/1000).toFixed(1) + 'k' : '$' + totalVolume.toFixed(0);
+  document.getElementById('statSwaps').textContent = swapCount;
+  document.getElementById('statFees').textContent = '$' + totalFees.toFixed(2);
+}
+
+function updateRecentTrades() {
+  const el = document.getElementById('recentTrades');
+  const list = document.getElementById('tradesList');
+  if (recentSwaps.length === 0) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  list.innerHTML = recentSwaps.slice(0,5).map(s => `
+    <div class="trade-row">
+      <span>${s.fromAmt} ${s.from} -> ${s.toAmt} ${s.to}</span>
+      <span style="color:var(--dim);">
+        ${s.sig ? `<a href="https://solscan.io/tx/${s.sig}" target="_blank" style="color:var(--accent2);text-decoration:none;">${s.time}</a>` : s.time}
+      </span>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', () => {
+  loadStats();
+  // Auto-connect if Phantom was previously connected
+  const provider = window.phantom?.solana || window.solana;
+  if (provider?.isPhantom) {
+    provider.on('connect', () => {});
+    // Try eager connect (reconnect if previously approved)
+    provider.connect({ onlyIfTrusted: true }).then(resp => {
+      walletPubkey = resp.publicKey.toString();
+      walletConnected = true;
+      const btn = document.getElementById('connectBtn');
+      btn.textContent = walletPubkey.substring(0,4) + '...' + walletPubkey.substring(walletPubkey.length-4);
+      btn.classList.add('connected');
+      document.getElementById('swapBtn').disabled = false;
+      document.getElementById('swapBtn').textContent = 'Swap';
+      updateBalance();
+    }).catch(() => {});
+  }
+});
+</script>
+
+</body>
+</html>
