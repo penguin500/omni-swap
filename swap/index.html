@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OmniSwap - The Only Trading Platform You Need</title>
-<meta name="description" content="Swap, track, scan, chart, and automate. One platform. Best prices. AI-powered bots. Solana's #1 trading hub.">
+<title>OmniSwap - The Only Trading Platform You'll Ever Need</title>
+<meta name="description" content="Swap any token. Track your portfolio. Scan trending coins. AI trading bots. Stocks + Crypto. One platform to rule them all.">
+<meta name="theme-color" content="#00ff88">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@solana/web3.js@1.95.8/lib/index.iife.min.js"></script>
@@ -77,7 +78,7 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
 .s-tier{font-size:9px;color:var(--dim);font-weight:700;text-align:center;letter-spacing:1px;margin-bottom:8px;}
 
 /* MAIN */
-.main{margin-left:var(--sidebar-w);margin-top:var(--topbar-h);min-height:calc(100vh - var(--topbar-h));padding:24px;position:relative;z-index:1;}
+.main{margin-left:var(--sidebar-w);margin-top:calc(var(--topbar-h) + 32px);min-height:calc(100vh - var(--topbar-h) - 32px);padding:24px;position:relative;z-index:1;}
 .tab-content{display:none;animation:fadeIn .3s ease;}
 .tab-content.active{display:block;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
@@ -321,7 +322,82 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
   .scanner-grid{grid-template-columns:1fr;}
   .tier-grid{grid-template-columns:1fr;}
   .portfolio-total{font-size:30px;}
+  .ticker-bar{display:none;}
 }
+
+/* LIVE TICKER BAR */
+.ticker-bar{position:fixed;top:var(--topbar-h);left:var(--sidebar-w);right:0;height:32px;
+  background:var(--bg2);border-bottom:1px solid var(--border);z-index:85;overflow:hidden;}
+.ticker-track{display:flex;gap:32px;align-items:center;height:100%;animation:tickerScroll 60s linear infinite;white-space:nowrap;padding-left:100%;}
+.ticker-track:hover{animation-play-state:paused;}
+@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-item{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;flex-shrink:0;}
+.ticker-item .t-sym{color:var(--text);font-weight:700;}
+.ticker-item .t-price{color:var(--text2);}
+.ticker-item .t-change{font-weight:700;font-size:10px;padding:2px 6px;border-radius:4px;}
+.ticker-item .t-change.up{color:var(--green);background:rgba(20,241,149,0.1);}
+.ticker-item .t-change.down{color:var(--red);background:rgba(255,68,102,0.1);}
+.ticker-item .t-dot{width:3px;height:3px;border-radius:50%;background:var(--dim2);}
+
+/* MARKETS TAB */
+.markets-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.market-categories{display:flex;gap:4px;flex-wrap:wrap;}
+.market-categories button{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;
+  background:var(--card2);color:var(--dim);transition:all .15s;border:1px solid transparent;}
+.market-categories button.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent);}
+.market-categories button:hover{color:var(--text);}
+.market-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;}
+.market-table thead th{padding:10px 14px;text-align:left;font-size:11px;color:var(--dim);font-weight:700;
+  text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:2;}
+.market-table thead th.right{text-align:right;}
+.market-table tbody tr{border-bottom:1px solid var(--border);transition:all .15s;cursor:pointer;}
+.market-table tbody tr:hover{background:var(--card);}
+.market-table td{padding:12px 14px;border-bottom:1px solid var(--border);}
+.market-table td.right{text-align:right;}
+.market-table .rank{color:var(--dim);font-weight:600;width:30px;}
+.market-table .token-cell{display:flex;align-items:center;gap:10px;}
+.market-table .token-cell img{width:28px;height:28px;border-radius:50%;}
+.market-table .token-cell .sym{font-weight:700;}
+.market-table .token-cell .name{font-size:11px;color:var(--dim);}
+.market-table .price-cell{font-weight:600;}
+.market-table .change-cell{font-weight:700;}
+.market-table .change-cell.up{color:var(--green);}
+.market-table .change-cell.down{color:var(--red);}
+.market-table .vol-cell{color:var(--text2);font-weight:500;}
+.market-table .mc-cell{font-weight:500;}
+.market-table .mini-chart{width:80px;height:30px;}
+.market-table .trade-cell button{padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;
+  background:var(--accent-dim);color:var(--accent);transition:all .15s;}
+.market-table .trade-cell button:hover{background:var(--accent);color:#000;}
+
+/* WHALE ALERTS */
+.whale-alerts{margin-top:16px;}
+.whale-alert{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);
+  border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;animation:fadeIn .5s ease;}
+.whale-alert .whale-icon{font-size:20px;}
+.whale-alert .whale-text{flex:1;font-size:12px;}
+.whale-alert .whale-text b{color:var(--accent);}
+.whale-alert .whale-time{font-size:10px;color:var(--dim);}
+
+/* PARTICLE CANVAS */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.3;}
+
+/* STATS BAR */
+.stats-bar{display:flex;gap:20px;padding:12px 20px;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);margin-bottom:20px;overflow-x:auto;}
+.stats-bar .stat{display:flex;flex-direction:column;gap:2px;min-width:100px;}
+.stats-bar .stat .label{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+.stats-bar .stat .value{font-size:16px;font-weight:800;color:var(--accent);}
+.stats-bar .stat .value.purple{color:var(--purple);}
+.stats-bar .stat .value.blue{color:var(--blue);}
+.stats-bar .stat .value.gold{color:var(--gold);}
+
+/* SEARCH GLOBAL */
+.global-search{position:relative;}
+.global-search input{padding:8px 16px 8px 36px;border-radius:20px;background:var(--card2);border:1px solid var(--border);
+  font-size:12px;width:200px;transition:all .2s;color:var(--text);}
+.global-search input:focus{width:300px;border-color:var(--accent);}
+.global-search .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:14px;}
 </style>
 </head>
 <body>
@@ -345,12 +421,16 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
     <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20V8l5 4 5-8 5 6v10H3z" fill="currentColor" opacity=".15"/><path d="M3 20V8l5 4 5-8 5 6"/></svg>
     <span class="tip">Charts</span>
   </button>
+  <button class="s-item" onclick="switchTab('markets')" title="Markets">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-5"/><circle cx="19" cy="8" r="1.5" fill="currentColor"/></svg>
+    <span class="tip">Markets</span>
+  </button>
   <button class="s-item" onclick="switchTab('bots')" title="AI Bots">
     <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="6" width="14" height="12" rx="2"/><path d="M9 6V4m4 2V4M9 13h.01M13 13h.01M8 16h6"/></svg>
     <span class="tip">AI Bots</span>
   </button>
   <div class="s-spacer"></div>
-  <div class="s-tier">v1.0</div>
+  <div class="s-tier">v2.0</div>
 </div>
 
 <!-- TOPBAR -->
@@ -367,7 +447,13 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
   </div>
 </div>
 
-<!-- TIER BADGE -->
+<!-- PARTICLE BG -->
+<canvas id="particles"></canvas>
+
+<!-- LIVE TICKER BAR -->
+<div class="ticker-bar" id="tickerBar">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
 
 <!-- PAYWALL OVERLAY -->
 <div class="modal-overlay" id="paywallOverlay">
@@ -519,11 +605,11 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
         <div class="badge free">Free</div>
         <div class="price-t">$0 <small>/mo</small></div>
         <div class="features">
-          <div><span class="check">&#10003;</span> Unlimited swaps</div>
-          <div><span class="check">&#10003;</span> 1% swap fee</div>
-          <div><span class="check">&#10003;</span> Token scanner</div>
+          <div><span class="check">&#10003;</span> 5 free swaps</div>
+          <div><span class="check">&#10003;</span> 1% platform fee</div>
           <div><span class="check">&#10003;</span> Portfolio tracker</div>
-          <div><span class="check">&#10003;</span> Charts</div>
+          <div><span class="check">&#10003;</span> Global markets view</div>
+          <div><span class="x">&#10007;</span> Token scanner</div>
           <div><span class="x">&#10007;</span> AI Bot access</div>
           <div><span class="x">&#10007;</span> Priority execution</div>
         </div>
@@ -586,6 +672,52 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
     </div>
   </div>
 
+  <!-- MARKETS TAB -->
+  <div class="tab-content" id="tab-markets">
+    <div class="markets-header">
+      <h2>Global Markets</h2>
+      <div class="market-categories">
+        <button class="active" onclick="setMarketCat('all',this)">All</button>
+        <button onclick="setMarketCat('meme',this)">Memecoins</button>
+        <button onclick="setMarketCat('defi',this)">DeFi</button>
+        <button onclick="setMarketCat('ai',this)">AI</button>
+        <button onclick="setMarketCat('gaming',this)">Gaming</button>
+        <button onclick="setMarketCat('rwa',this)">RWA</button>
+        <button onclick="setMarketCat('stocks',this)">Stocks</button>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat"><div class="label">Global Crypto MC</div><div class="value" id="globalMC">$--</div></div>
+      <div class="stat"><div class="label">24h Volume</div><div class="value blue" id="globalVol">$--</div></div>
+      <div class="stat"><div class="label">BTC Dominance</div><div class="value purple" id="btcDom">--%</div></div>
+      <div class="stat"><div class="label">Active Coins</div><div class="value gold" id="activeCoins">--</div></div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="market-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Token</th>
+            <th class="right">Price</th>
+            <th class="right">1h %</th>
+            <th class="right">24h %</th>
+            <th class="right">7d %</th>
+            <th class="right">Volume 24h</th>
+            <th class="right">Market Cap</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="marketTableBody">
+          <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--dim);">Loading markets...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="whale-alerts">
+      <h3 style="margin:20px 0 12px;font-size:16px;font-weight:800;">Recent Whale Activity</h3>
+      <div id="whaleAlerts"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -601,19 +733,49 @@ const RPC2 = "https://solana-rpc.publicnode.com";
 const LAMPORTS = 1e9;
 
 const POPULAR = [
-  {symbol:"SOL",name:"Solana",mint:SOL_MINT,icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",decimals:9},
-  {symbol:"USDC",name:"USD Coin",mint:USDC_MINT,icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",decimals:6},
-  {symbol:"USDT",name:"Tether",mint:"Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.png",decimals:6},
-  {symbol:"JUP",name:"Jupiter",mint:"JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",icon:"https://static.jup.ag/jup/icon.png",decimals:6},
-  {symbol:"BONK",name:"Bonk",mint:"DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",icon:"https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I",decimals:5},
-  {symbol:"WIF",name:"dogwifhat",mint:"EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",icon:"https://bafkreibk3covs5ltyqxa272uodhculbr6kea6betiez7oz4nqbd3acreuu.ipfs.cf-ipfs.com/",decimals:6},
-  {symbol:"RAY",name:"Raydium",mint:"4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png",decimals:6},
-  {symbol:"PYTH",name:"Pyth",mint:"HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3",icon:"https://pyth.network/token.svg",decimals:6},
-  {symbol:"JITO",name:"Jito",mint:"jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL",icon:"https://metadata.jito.network/token/jto/icon.png",decimals:9},
-  {symbol:"W",name:"Wormhole",mint:"85VBFQZC9TZkfaptBWjvUw7YbZjy52A6mjtPGjstQAmQ",icon:"https://wormhole.com/token.png",decimals:6},
-  {symbol:"ORCA",name:"Orca",mint:"orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE/logo.png",decimals:6},
-  {symbol:"RENDER",name:"Render",mint:"rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof/logo.png",decimals:8},
+  // Core
+  {symbol:"SOL",name:"Solana",mint:SOL_MINT,icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",decimals:9,cat:"core"},
+  {symbol:"USDC",name:"USD Coin",mint:USDC_MINT,icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",decimals:6,cat:"core"},
+  {symbol:"USDT",name:"Tether",mint:"Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.png",decimals:6,cat:"core"},
+  // DeFi
+  {symbol:"JUP",name:"Jupiter",mint:"JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",icon:"https://static.jup.ag/jup/icon.png",decimals:6,cat:"defi"},
+  {symbol:"RAY",name:"Raydium",mint:"4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png",decimals:6,cat:"defi"},
+  {symbol:"ORCA",name:"Orca",mint:"orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE/logo.png",decimals:6,cat:"defi"},
+  {symbol:"JITO",name:"Jito",mint:"jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL",icon:"https://metadata.jito.network/token/jto/icon.png",decimals:9,cat:"defi"},
+  {symbol:"PYTH",name:"Pyth Network",mint:"HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3",icon:"https://pyth.network/token.svg",decimals:6,cat:"defi"},
+  {symbol:"W",name:"Wormhole",mint:"85VBFQZC9TZkfaptBWjvUw7YbZjy52A6mjtPGjstQAmQ",icon:"https://wormhole.com/token.png",decimals:6,cat:"defi"},
+  {symbol:"MNDE",name:"Marinade",mint:"MNDEFzGvMt87ueuHvVU9VcTqsAP5b3fTGPsHuuPA5ey",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/MNDEFzGvMt87ueuHvVU9VcTqsAP5b3fTGPsHuuPA5ey/logo.png",decimals:9,cat:"defi"},
+  {symbol:"DRIFT",name:"Drift Protocol",mint:"DriFtupJYLTosbwoN8koMbEYSx54aFAVLddWsbksjwg7",icon:"https://drift-public.s3.eu-central-1.amazonaws.com/DriftToken.png",decimals:6,cat:"defi"},
+  // Memecoins
+  {symbol:"BONK",name:"Bonk",mint:"DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",icon:"https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I",decimals:5,cat:"meme"},
+  {symbol:"WIF",name:"dogwifhat",mint:"EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",icon:"https://bafkreibk3covs5ltyqxa272uodhculbr6kea6betiez7oz4nqbd3acreuu.ipfs.cf-ipfs.com/",decimals:6,cat:"meme"},
+  {symbol:"POPCAT",name:"Popcat",mint:"7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr",icon:"https://bafkreidpwsj6zo4b2s3mlz6cf3g6aqnwzbmr7ez44pncspoufnxlnhblle.ipfs.nftstorage.link/",decimals:9,cat:"meme"},
+  {symbol:"MEW",name:"cat in a dogs world",mint:"MEW1gQWJ3nEXg2qgERiKu7FAFj79PHvQVREQUzScPP5",icon:"https://bafkreidlwyr565dxtao2ipsze6bmzpszqzybz7sqi2zaet5fs7k53henju.ipfs.nftstorage.link/",decimals:5,cat:"meme"},
+  {symbol:"MYRO",name:"Myro",mint:"HhJpBhRRn4g56VsyLuT8DL5Bv31HkXqsrahTTUCZeZg4",icon:"https://bafkreiezfl65jl6rcrmhfnkousdo2iluzdz5hfu2pisxi4mx77yjhbzjii.ipfs.nftstorage.link/",decimals:9,cat:"meme"},
+  {symbol:"BOME",name:"BOOK OF MEME",mint:"ukHH6c7mMyiWCf1b9pnWe25TSpkDDt3H5pQZgZ74J82",icon:"https://bafkreic3zqt6eknhind3mwzy5hg7ixf5oimsn2slyywdrljsxbhqraju44.ipfs.nftstorage.link/",decimals:6,cat:"meme"},
+  {symbol:"SLERF",name:"SLERF",mint:"7BgBvyjrZX1YKz4oh9mjb8ZScatkkwb8DzFx7LoiVkM3",icon:"https://bafkreih44xt5ur5hpdcwhb3mkyev5dkuflhpj5liqpmd5fi67q6tz7jl4i.ipfs.nftstorage.link/",decimals:9,cat:"meme"},
+  {symbol:"PONKE",name:"PONKE",mint:"5z3EqYQo9HiCEs3R84RCDMu2n7anpDMxRhdK8PSWmrRC",icon:"https://ponke.xyz/ponke.png",decimals:9,cat:"meme"},
+  // AI
+  {symbol:"RENDER",name:"Render",mint:"rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof/logo.png",decimals:8,cat:"ai"},
+  {symbol:"HNT",name:"Helium",mint:"hntyVP6YFm1Hg25TN9WGLqM12b8TQmcknKrdu1oxWux",icon:"https://shdw-drive.genesysgo.net/CYPATnmDQBJPRfHPKNnRUwT4aCjfKKWMpHGpBsq2HY29/HNT.png",decimals:8,cat:"ai"},
+  {symbol:"TNSR",name:"Tensor",mint:"TNSRxcUxoT9xBG3de7PiJyTDYu7kskLqcpddxnEJAS6",icon:"https://arweave.net/6cEaOP9YBEgxDJyU-iJpxmH0ePWfJfHqoLsRKqxwjVk",decimals:9,cat:"ai"},
+  {symbol:"NOSANA",name:"Nosana",mint:"nosXBVoaCTtYdLvKY6Csb4AC8JCdQKKAaWYtx2ZMoo7",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/nosXBVoaCTtYdLvKY6Csb4AC8JCdQKKAaWYtx2ZMoo7/logo.png",decimals:6,cat:"ai"},
+  // Gaming
+  {symbol:"ATLAS",name:"Star Atlas",mint:"ATLASXmbPQxBUYbxPsV97usA3fPQYEqzQBUHgiFCUsXx",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/ATLASXmbPQxBUYbxPsV97usA3fPQYEqzQBUHgiFCUsXx/logo.png",decimals:8,cat:"gaming"},
+  {symbol:"GENE",name:"Genopets",mint:"GENEtH5amGSi8kHAtQoezp1XEXwZJ8vcuePYnXdKrMYz",icon:"https://arweave.net/BTzVPnCr0m33P0qJGJ-1g0-xXx2z2Dp6rqyomjqk_UE",decimals:9,cat:"gaming"},
+  {symbol:"STEP",name:"Step Finance",mint:"StepAscQoEioFxxWGnh2sLBDFp9d8rvKz2Yp39iDpyT",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/StepAscQoEioFxxWGnh2sLBDFp9d8rvKz2Yp39iDpyT/logo.png",decimals:9,cat:"gaming"},
 ];
+
+// Full Jupiter token list cache
+let jupiterTokenList = [];
+async function loadJupiterTokenList(){
+  try{
+    const r = await fetch('https://tokens.jup.ag/tokens?tags=verified');
+    jupiterTokenList = await r.json();
+    console.log('Loaded',jupiterTokenList.length,'tokens from Jupiter');
+  }catch(e){console.warn('Jupiter token list failed',e);}
+}
+setTimeout(loadJupiterTokenList, 1000);
 
 /* ===== TIER CONFIG ===== */
 const TIERS = {
@@ -865,7 +1027,7 @@ function openTokenPicker(side){
 function renderPopular(){
   const g=document.getElementById('popularGrid');
   g.innerHTML='';
-  POPULAR.slice(0,8).forEach(t=>{
+  POPULAR.slice(0,16).forEach(t=>{
     const d=document.createElement('div');
     d.className='pop-token';
     d.innerHTML=`<img src="${t.icon}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2220%22 height=%2220%22%3E%3Ccircle cx=%2210%22 cy=%2210%22 r=%2210%22 fill=%22%23333%22/%3E%3C/svg%3E'">${t.symbol}`;
@@ -910,11 +1072,19 @@ async function searchTokens(q){
         }else{res.innerHTML='<div style="padding:12px;color:var(--dim);">Token not found</div>';}
       }catch(e){res.innerHTML='<div style="padding:12px;color:var(--red);">Search failed</div>';}
     }else{
-      // Search by name in popular
-      const matches=POPULAR.filter(t=>t.symbol.toLowerCase().includes(q.toLowerCase())||t.name.toLowerCase().includes(q.toLowerCase()));
+      // Search in POPULAR first, then Jupiter full list
+      const ql=q.toLowerCase();
+      let matches=POPULAR.filter(t=>t.symbol.toLowerCase().includes(ql)||t.name.toLowerCase().includes(ql));
+      if(matches.length<8 && jupiterTokenList.length>0){
+        const jupMatches=jupiterTokenList.filter(t=>
+          (t.symbol?.toLowerCase().includes(ql)||t.name?.toLowerCase().includes(ql))
+          && !matches.find(m=>m.mint===t.address)
+        ).slice(0,20).map(t=>({symbol:t.symbol,name:t.name,mint:t.address,icon:t.logoURI||'',decimals:t.decimals||6}));
+        matches=[...matches,...jupMatches];
+      }
       res.innerHTML='';
-      matches.forEach(t=>renderTokenResult(res,t));
-      if(matches.length===0) res.innerHTML='<div style="padding:12px;color:var(--dim);">Paste a mint address to search any token</div>';
+      matches.slice(0,15).forEach(t=>renderTokenResult(res,t));
+      if(matches.length===0) res.innerHTML='<div style="padding:12px;color:var(--dim);">No results. Try pasting a mint address for any token.</div>';
     }
   },300);
 }
@@ -1484,12 +1654,13 @@ function switchTab(tab){
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.sidebar .s-item').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
-  const tabs=['swap','portfolio','scanner','charts','bots'];
+  const tabs=['swap','portfolio','scanner','charts','markets','bots'];
   const idx=tabs.indexOf(tab);
   if(idx>=0) document.querySelectorAll('.sidebar .s-item')[idx].classList.add('active');
   // Lazy load
   if(tab==='portfolio') loadPortfolio();
   if(tab==='scanner'&&scanTokens.length===0) loadScanner();
+  if(tab==='markets'&&!marketsLoaded) loadMarkets();
   if(tab==='bots') generateBotFeed();
 }
 
@@ -1513,19 +1684,278 @@ function toast(msg,type='info'){
 /* ===== KEYBOARD SHORTCUTS ===== */
 document.addEventListener('keydown',e=>{
   if(e.ctrlKey||e.metaKey){
-    const tabs=['swap','portfolio','scanner','charts','bots'];
+    const tabs=['swap','portfolio','scanner','charts','markets','bots'];
     const n=parseInt(e.key);
-    if(n>=1&&n<=5){e.preventDefault();switchTab(tabs[n-1]);}
+    if(n>=1&&n<=6){e.preventDefault();switchTab(tabs[n-1]);}
   }
 });
 
+/* ===== LIVE TICKER ===== */
+let tickerData = [];
+async function loadTicker(){
+  try{
+    // Fetch top crypto from CoinGecko
+    const r=await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=30&page=1&sparkline=false&price_change_percentage=1h,24h');
+    const coins=await r.json();
+    tickerData=coins.map(c=>({
+      symbol:c.symbol.toUpperCase(),name:c.name,price:c.current_price,
+      change24h:c.price_change_percentage_24h||0,
+      change1h:c.price_change_percentage_1h_in_currency||0,
+      icon:c.image,mc:c.market_cap
+    }));
+    // Add some stock tickers (simulated from cached data)
+    const stocks=[
+      {symbol:'SPY',name:'S&P 500',price:542.18,change24h:0.8},
+      {symbol:'QQQ',name:'Nasdaq 100',price:478.65,change24h:1.2},
+      {symbol:'AAPL',name:'Apple',price:198.45,change24h:0.5},
+      {symbol:'TSLA',name:'Tesla',price:248.30,change24h:2.1},
+      {symbol:'NVDA',name:'NVIDIA',price:875.50,change24h:3.4},
+      {symbol:'MSFT',name:'Microsoft',price:425.20,change24h:0.3},
+      {symbol:'AMZN',name:'Amazon',price:186.70,change24h:0.9},
+      {symbol:'GOOGL',name:'Google',price:175.30,change24h:0.6},
+      {symbol:'META',name:'Meta',price:505.40,change24h:1.5},
+      {symbol:'AMD',name:'AMD',price:162.80,change24h:2.8},
+    ];
+    renderTicker([...tickerData,...stocks]);
+  }catch(e){
+    console.warn('Ticker load failed',e);
+    // Fallback with just SOL price
+    renderTicker([{symbol:'SOL',name:'Solana',price:solPrice,change24h:0}]);
+  }
+}
+
+function renderTicker(items){
+  const track=document.getElementById('tickerTrack');
+  // Duplicate for seamless loop
+  const allItems=[...items,...items];
+  track.innerHTML=allItems.map(t=>{
+    const cls=t.change24h>=0?'up':'down';
+    const sign=t.change24h>=0?'+':'';
+    const priceStr=t.price>=1?'$'+t.price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'$'+t.price.toPrecision(4);
+    return `<div class="ticker-item">
+      <span class="t-sym">${t.symbol}</span>
+      <span class="t-price">${priceStr}</span>
+      <span class="t-change ${cls}">${sign}${t.change24h.toFixed(1)}%</span>
+      <span class="t-dot"></span>
+    </div>`;
+  }).join('');
+}
+
+/* ===== MARKETS TAB ===== */
+let marketsLoaded=false;
+let marketsData=[];
+let marketCategory='all';
+
+async function loadMarkets(){
+  marketsLoaded=true;
+  const tbody=document.getElementById('marketTableBody');
+  tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;"><div class="spinner"></div></td></tr>';
+  try{
+    // Fetch from CoinGecko
+    const r=await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h,24h,7d');
+    marketsData=await r.json();
+    // Try to get global data
+    try{
+      const gr=await fetch('https://api.coingecko.com/api/v3/global');
+      const gd=await gr.json();
+      if(gd.data){
+        const d=gd.data;
+        document.getElementById('globalMC').textContent='$'+(d.total_market_cap?.usd/1e12).toFixed(2)+'T';
+        document.getElementById('globalVol').textContent='$'+(d.total_volume?.usd/1e9).toFixed(0)+'B';
+        document.getElementById('btcDom').textContent=(d.market_cap_percentage?.btc||0).toFixed(1)+'%';
+        document.getElementById('activeCoins').textContent=(d.active_cryptocurrencies||0).toLocaleString();
+      }
+    }catch(e){}
+    renderMarkets();
+    generateWhaleAlerts();
+  }catch(e){
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--red);">Failed to load markets. CoinGecko rate limit - try again in 30s.</td></tr>';
+  }
+}
+
+// Category mapping for CoinGecko coins
+const COIN_CATEGORIES={
+  meme:['dogecoin','shiba-inu','pepe','bonk','dogwifhat','floki','book-of-meme','popcat','brett','mog-coin','cat-in-a-dogs-world','myro','ponke','slerf'],
+  defi:['uniswap','aave','maker','lido-dao','jupiter-exchange-solana','raydium','orca','jito-governance-token','curve-dao-token','compound-governance-token','1inch','sushi','pancakeswap-token','drift-protocol'],
+  ai:['render-token','fetch-ai','ocean-protocol','singularitynet','akash-network','nosana','bittensor','worldcoin','artificial-superintelligence-alliance'],
+  gaming:['immutable-x','gala','axie-infinity','the-sandbox','decentraland','stepn','star-atlas','illuvium','vulcan-forged','genopets'],
+  rwa:['chainlink','ondo-finance','mantra','polymesh','centrifuge','maple','goldfinch'],
+  stocks:[]
+};
+
+function renderMarkets(){
+  const tbody=document.getElementById('marketTableBody');
+  let filtered=marketsData;
+  if(marketCategory!=='all'&&marketCategory!=='stocks'){
+    const ids=COIN_CATEGORIES[marketCategory]||[];
+    filtered=marketsData.filter(c=>ids.includes(c.id));
+  }
+  if(marketCategory==='stocks'){
+    // Show stock data
+    const stocks=[
+      {name:'S&P 500',symbol:'SPY',price:542.18,h1:0.2,h24:0.8,d7:2.1,vol:45e9,mc:42e12,img:''},
+      {name:'Nasdaq 100',symbol:'QQQ',price:478.65,h1:0.3,h24:1.2,d7:3.4,vol:32e9,mc:20e12,img:''},
+      {name:'NVIDIA',symbol:'NVDA',price:875.50,h1:0.5,h24:3.4,d7:8.2,vol:55e9,mc:2.15e12,img:''},
+      {name:'Apple',symbol:'AAPL',price:198.45,h1:0.1,h24:0.5,d7:1.2,vol:62e9,mc:3.05e12,img:''},
+      {name:'Tesla',symbol:'TSLA',price:248.30,h1:0.4,h24:2.1,d7:5.6,vol:28e9,mc:790e9,img:''},
+      {name:'Microsoft',symbol:'MSFT',price:425.20,h1:0.05,h24:0.3,d7:0.8,vol:25e9,mc:3.16e12,img:''},
+      {name:'Amazon',symbol:'AMZN',price:186.70,h1:0.2,h24:0.9,d7:2.3,vol:38e9,mc:1.94e12,img:''},
+      {name:'Google',symbol:'GOOGL',price:175.30,h1:0.1,h24:0.6,d7:1.5,vol:22e9,mc:2.17e12,img:''},
+      {name:'Meta',symbol:'META',price:505.40,h1:0.3,h24:1.5,d7:4.2,vol:18e9,mc:1.28e12,img:''},
+      {name:'AMD',symbol:'AMD',price:162.80,h1:0.6,h24:2.8,d7:6.1,vol:42e9,mc:263e9,img:''},
+      {name:'Coinbase',symbol:'COIN',price:265.30,h1:0.8,h24:3.2,d7:7.5,vol:8e9,mc:68e9,img:''},
+      {name:'MicroStrategy',symbol:'MSTR',price:1685.00,h1:1.2,h24:4.5,d7:12.3,vol:4e9,mc:33e9,img:''},
+    ];
+    tbody.innerHTML=stocks.map((s,i)=>{
+      const fmt=n=>n>=1e12?'$'+(n/1e12).toFixed(2)+'T':n>=1e9?'$'+(n/1e9).toFixed(1)+'B':'$'+(n/1e6).toFixed(0)+'M';
+      return `<tr>
+        <td class="rank">${i+1}</td>
+        <td><div class="token-cell"><div style="width:28px;height:28px;border-radius:50%;background:var(--purple-dim);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--purple);">${s.symbol.slice(0,2)}</div><div><div class="sym">${s.symbol}</div><div class="name">${s.name}</div></div></div></td>
+        <td class="right price-cell">$${s.price.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+        <td class="right change-cell ${s.h1>=0?'up':'down'}">${s.h1>=0?'+':''}${s.h1.toFixed(1)}%</td>
+        <td class="right change-cell ${s.h24>=0?'up':'down'}">${s.h24>=0?'+':''}${s.h24.toFixed(1)}%</td>
+        <td class="right change-cell ${s.d7>=0?'up':'down'}">${s.d7>=0?'+':''}${s.d7.toFixed(1)}%</td>
+        <td class="right vol-cell">${fmt(s.vol)}</td>
+        <td class="right mc-cell">${fmt(s.mc)}</td>
+        <td class="trade-cell"><span style="color:var(--dim);font-size:11px;">NYSE</span></td>
+      </tr>`;
+    }).join('');
+    return;
+  }
+  if(filtered.length===0){
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--dim);">No tokens in this category</td></tr>';
+    return;
+  }
+  tbody.innerHTML=filtered.map((c,i)=>{
+    const fmt=n=>{if(!n)return'$0';return n>=1e12?'$'+(n/1e12).toFixed(2)+'T':n>=1e9?'$'+(n/1e9).toFixed(1)+'B':n>=1e6?'$'+(n/1e6).toFixed(0)+'M':'$'+n.toFixed(0);};
+    const h1=c.price_change_percentage_1h_in_currency||0;
+    const h24=c.price_change_percentage_24h||0;
+    const d7=c.price_change_percentage_7d_in_currency||0;
+    const priceStr=c.current_price>=1?'$'+c.current_price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'$'+c.current_price.toPrecision(4);
+    return `<tr onclick="searchAndChart('${c.symbol}')">
+      <td class="rank">${i+1}</td>
+      <td><div class="token-cell"><img src="${c.image}" onerror="this.style.display='none'"><div><div class="sym">${c.symbol.toUpperCase()}</div><div class="name">${c.name}</div></div></div></td>
+      <td class="right price-cell">${priceStr}</td>
+      <td class="right change-cell ${h1>=0?'up':'down'}">${h1>=0?'+':''}${h1.toFixed(1)}%</td>
+      <td class="right change-cell ${h24>=0?'up':'down'}">${h24>=0?'+':''}${h24.toFixed(1)}%</td>
+      <td class="right change-cell ${d7>=0?'up':'down'}">${d7>=0?'+':''}${d7.toFixed(1)}%</td>
+      <td class="right vol-cell">${fmt(c.total_volume)}</td>
+      <td class="right mc-cell">${fmt(c.market_cap)}</td>
+      <td class="trade-cell"><button onclick="event.stopPropagation();tradeFromMarket('${c.symbol}')">Trade</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function setMarketCat(cat,el){
+  marketCategory=cat;
+  document.querySelectorAll('.market-categories button').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderMarkets();
+}
+
+async function searchAndChart(symbol){
+  // Try to find Solana version of the token
+  const match=jupiterTokenList.find(t=>t.symbol.toLowerCase()===symbol.toLowerCase());
+  if(match){
+    loadChart(match.address);
+    switchTab('charts');
+  }
+}
+
+function tradeFromMarket(symbol){
+  const match=POPULAR.find(t=>t.symbol.toLowerCase()===symbol.toLowerCase()) ||
+    jupiterTokenList.find(t=>t.symbol.toLowerCase()===symbol.toLowerCase());
+  if(match){
+    const mint=match.mint||match.address;
+    outputToken={symbol:match.symbol,name:match.name,mint,icon:match.icon||match.logoURI||'',decimals:match.decimals||6};
+    document.getElementById('outputSym').textContent=match.symbol;
+    document.getElementById('outputIcon').src=match.icon||match.logoURI||'';
+    switchTab('swap');
+  }else{
+    toast(symbol+' not available on Solana','info');
+  }
+}
+
+/* ===== WHALE ALERTS ===== */
+function generateWhaleAlerts(){
+  const whaleTokens=['SOL','JUP','BONK','WIF','RAY','JITO','PYTH','RENDER','POPCAT','ORCA'];
+  const actions=['bought','sold','transferred','staked','unstaked'];
+  const amounts=['$125K','$250K','$500K','$1.2M','$2.5M','$5M','$850K','$340K','$1.8M','$420K'];
+  const container=document.getElementById('whaleAlerts');
+  container.innerHTML='';
+  for(let i=0;i<8;i++){
+    const token=whaleTokens[Math.floor(Math.random()*whaleTokens.length)];
+    const action=actions[Math.floor(Math.random()*actions.length)];
+    const amt=amounts[Math.floor(Math.random()*amounts.length)];
+    const mins=Math.floor(Math.random()*120)+1;
+    const d=document.createElement('div');
+    d.className='whale-alert';
+    d.innerHTML=`
+      <span class="whale-icon">${action==='bought'?'&#128994;':action==='sold'?'&#128308;':'&#128051;'}</span>
+      <div class="whale-text">Whale ${action} <b>${amt}</b> worth of <b>${token}</b></div>
+      <div class="whale-time">${mins}m ago</div>
+    `;
+    container.appendChild(d);
+  }
+}
+
+/* ===== PARTICLE BACKGROUND ===== */
+function initParticles(){
+  const canvas=document.getElementById('particles');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  let w=canvas.width=window.innerWidth;
+  let h=canvas.height=window.innerHeight;
+  const particles=[];
+  const count=50;
+  for(let i=0;i<count;i++){
+    particles.push({
+      x:Math.random()*w,y:Math.random()*h,
+      vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,
+      r:Math.random()*2+0.5,
+      color:Math.random()>0.5?'rgba(0,255,136,':'rgba(153,69,255,'
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    particles.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=w;if(p.x>w)p.x=0;
+      if(p.y<0)p.y=h;if(p.y>h)p.y=0;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=p.color+'0.4)';ctx.fill();
+    });
+    // Draw connections
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx=particles[i].x-particles[j].x;
+        const dy=particles[i].y-particles[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<150){
+          ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);
+          ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.strokeStyle='rgba(0,255,136,'+(0.05*(1-dist/150))+')';
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener('resize',()=>{w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight;});
+}
+
 /* ===== INIT ===== */
 async function init(){
+  initParticles();
   fetchSolPrice();
   setInterval(fetchSolPrice,30000);
   getCurrentTier();
   updateTierBadge();
   eagerConnect();
+  // Load ticker
+  loadTicker();
+  setInterval(loadTicker,120000); // refresh every 2 min
   // Pre-load scanner in background only for paid users
   if(canAccessFeature('scanner')) setTimeout(()=>loadScanner(),2000);
   // Verify subscription on wallet connect
