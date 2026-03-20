@@ -1,0 +1,155 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OmniSwap API",
+    "description": "The fastest Solana swap API for bots and AI agents. Best prices via Jupiter aggregator. 0.5% platform fee. Python + JS SDKs available.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "OmniSwap",
+      "url": "https://penguin500.github.io/omni-swap/docs/"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://omniswap-api.workers.dev",
+      "description": "Production API (Cloudflare Workers)"
+    }
+  ],
+  "paths": {
+    "/v1/quote": {
+      "get": {
+        "operationId": "getQuote",
+        "summary": "Get swap quote with best price",
+        "description": "Returns the best swap route and expected output amount. Uses Jupiter aggregator for optimal pricing. Includes 0.5% platform fee (50 bps).",
+        "parameters": [
+          {"name": "inputMint", "in": "query", "required": true, "schema": {"type": "string"}, "description": "Input token mint address (e.g. So11111111111111111111111111111111111111112 for SOL)"},
+          {"name": "outputMint", "in": "query", "required": true, "schema": {"type": "string"}, "description": "Output token mint address"},
+          {"name": "amount", "in": "query", "required": true, "schema": {"type": "integer"}, "description": "Amount in smallest unit (lamports for SOL, 1 SOL = 1000000000)"},
+          {"name": "slippageBps", "in": "query", "schema": {"type": "integer", "default": 300}, "description": "Max slippage in basis points (300 = 3%)"}
+        ],
+        "responses": {
+          "200": {
+            "description": "Quote with route, output amount, and price impact",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "inputMint": {"type": "string"},
+                    "outputMint": {"type": "string"},
+                    "inAmount": {"type": "string"},
+                    "outAmount": {"type": "string"},
+                    "priceImpactPct": {"type": "string"},
+                    "routePlan": {"type": "array"},
+                    "platformFee": {"type": "object"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/swap": {
+      "post": {
+        "operationId": "executeSwap",
+        "summary": "Build swap transaction for signing",
+        "description": "Takes a quote response and returns a serialized transaction ready for wallet signing.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["quoteResponse", "userPublicKey"],
+                "properties": {
+                  "quoteResponse": {"type": "object", "description": "Quote response from /v1/quote"},
+                  "userPublicKey": {"type": "string", "description": "User's Solana wallet public key"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Serialized transaction (base64) ready for signing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "swapTransaction": {"type": "string", "description": "Base64-encoded transaction"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/price": {
+      "get": {
+        "operationId": "getPrice",
+        "summary": "Get token price in USD",
+        "parameters": [
+          {"name": "ids", "in": "query", "required": true, "schema": {"type": "string"}, "description": "Token mint address(es), comma-separated"}
+        ],
+        "responses": {
+          "200": {
+            "description": "Token prices",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {"type": "object"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tokens": {
+      "get": {
+        "operationId": "searchTokens",
+        "summary": "Search for tokens by name or symbol",
+        "parameters": [
+          {"name": "q", "in": "query", "required": true, "schema": {"type": "string"}, "description": "Search query (name, symbol, or mint address)"}
+        ],
+        "responses": {
+          "200": {
+            "description": "List of matching tokens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "symbol": {"type": "string"},
+                      "name": {"type": "string"},
+                      "address": {"type": "string"},
+                      "decimals": {"type": "integer"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-omniswap": {
+    "fee_wallet": "4CaTPEr4k17fsb6reefxRSaFg4jDUnSe29by3qpERZPn",
+    "platform_fee_bps": 50,
+    "sdks": {
+      "python": "pip install omniswap",
+      "javascript": "npm install @omniswap/sdk"
+    },
+    "docs": "https://penguin500.github.io/omni-swap/docs/",
+    "website": "https://penguin500.github.io/omni-swap/"
+  }
+}

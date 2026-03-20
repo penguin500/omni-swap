@@ -1,0 +1,82 @@
+{
+  "name": "omniswap",
+  "version": "1.0.0",
+  "description": "OmniSwap - Solana Token Swap API for Bots & AI Agents. Best prices via Jupiter. Swap any SPL token in 3 lines of code.",
+  "homepage": "https://penguin500.github.io/omni-swap/",
+  "documentation": "https://penguin500.github.io/omni-swap/docs/",
+  "tools": [
+    {
+      "name": "omniswap_quote",
+      "description": "Get a swap quote for any Solana token pair. Returns best price route via Jupiter aggregator with 0.5% platform fee included.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["input_token", "output_token", "amount"],
+        "properties": {
+          "input_token": {
+            "type": "string",
+            "description": "Input token symbol (SOL, USDC, BONK, etc.) or mint address"
+          },
+          "output_token": {
+            "type": "string",
+            "description": "Output token symbol or mint address"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount of input token to swap (in human-readable units, e.g. 1.5 SOL)"
+          },
+          "slippage_bps": {
+            "type": "integer",
+            "description": "Max slippage in basis points (default 300 = 3%)",
+            "default": 300
+          }
+        }
+      }
+    },
+    {
+      "name": "omniswap_execute",
+      "description": "Execute a token swap on Solana. Requires wallet private key. Builds and sends the transaction.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["input_token", "output_token", "amount", "private_key"],
+        "properties": {
+          "input_token": {"type": "string", "description": "Input token symbol or mint address"},
+          "output_token": {"type": "string", "description": "Output token symbol or mint address"},
+          "amount": {"type": "number", "description": "Amount to swap"},
+          "private_key": {"type": "string", "description": "Base58-encoded Solana wallet private key"},
+          "slippage_bps": {"type": "integer", "default": 300}
+        }
+      }
+    },
+    {
+      "name": "omniswap_price",
+      "description": "Get current price of any Solana token in USD.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["token"],
+        "properties": {
+          "token": {"type": "string", "description": "Token symbol (SOL, USDC, BONK) or mint address"}
+        }
+      }
+    },
+    {
+      "name": "omniswap_search",
+      "description": "Search for Solana tokens by name, symbol, or mint address.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": {"type": "string", "description": "Search query"}
+        }
+      }
+    }
+  ],
+  "auth": {
+    "type": "none",
+    "description": "No API key required for quotes and prices. Wallet private key needed for swap execution only."
+  },
+  "pricing": {
+    "model": "per_transaction",
+    "fee": "0.5% platform fee on each swap (50 basis points)",
+    "fee_wallet": "4CaTPEr4k17fsb6reefxRSaFg4jDUnSe29by3qpERZPn"
+  }
+}
