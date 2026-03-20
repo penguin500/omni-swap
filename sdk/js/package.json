@@ -1,0 +1,17 @@
+{
+  "name": "omniswap-sdk",
+  "version": "1.0.0",
+  "description": "The simplest Solana swap SDK. Built for bots & AI agents. Best prices via Jupiter aggregation.",
+  "main": "omniswap.js",
+  "scripts": {
+    "test": "node -e \"const {OmniSwap}=require('./omniswap'); const s=new OmniSwap(); console.log(s.info());\""
+  },
+  "keywords": ["solana", "swap", "jupiter", "defi", "bot", "agent", "trading", "crypto"],
+  "author": "OmniSwap",
+  "license": "MIT",
+  "homepage": "https://penguin500.github.io/omniseedai/docs/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/penguin500/omniseedai"
+  }
+}

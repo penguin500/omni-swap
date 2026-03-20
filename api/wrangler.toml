@@ -1,0 +1,9 @@
+name = "omniswap-api"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[triggers]
+crons = []
+
+# Deploy command: npx wrangler deploy
+# First time: npx wrangler login (opens browser to auth)
