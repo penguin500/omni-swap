@@ -361,9 +361,17 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
   </div>
   <div class="topbar-right">
     <div class="sol-price-badge" id="solPriceBadge">SOL $--</div>
+    <div id="tierBadge" style="font-size:11px;padding:4px 12px;border-radius:20px;font-weight:700;background:var(--dim2);color:var(--dim);">FREE (5 swaps left)</div>
     <div class="net-badge">Solana</div>
     <button class="wallet-btn" id="walletBtn" onclick="openWalletModal()">Connect Wallet</button>
   </div>
+</div>
+
+<!-- TIER BADGE -->
+
+<!-- PAYWALL OVERLAY -->
+<div class="modal-overlay" id="paywallOverlay">
+  <div class="modal" style="text-align:center;" id="paywallContent"></div>
 </div>
 
 <!-- TOAST -->
@@ -433,7 +441,10 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
       </div>
       <div class="swap-info" id="swapInfo" style="display:none"></div>
       <button class="swap-btn disabled" id="swapBtn" onclick="executeSwap()">Connect Wallet</button>
-      <div class="fee-banner">Optimized fees: <b>local fee market</b> + capped priority &mdash; you save up to <b>60%</b> on transaction fees</div>
+      <div class="fee-banner" id="feeBanner">
+        Optimized fees: <b>local fee market</b> + capped priority &mdash; you save up to <b>60%</b> on tx fees<br>
+        <span style="font-size:10px;opacity:0.7;">Free: 1% fee (5 swaps) | Pro: 0.5% (unlimited) | Whale: 0.25% (unlimited + priority)</span>
+      </div>
     </div>
   </div>
 
@@ -604,6 +615,14 @@ const POPULAR = [
   {symbol:"RENDER",name:"Render",mint:"rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof",icon:"https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof/logo.png",decimals:8},
 ];
 
+/* ===== TIER CONFIG ===== */
+const TIERS = {
+  free:  { feeBps:100, maxFreeSwaps:5, scannerAccess:false, chartsAccess:false, botsAccess:false, label:'FREE' },
+  pro:   { feeBps:50,  cost:0.1,  scannerAccess:true, chartsAccess:true, botsAccess:true, label:'PRO', profitShare:0.15 },
+  whale: { feeBps:25,  cost:0.5,  scannerAccess:true, chartsAccess:true, botsAccess:true, label:'WHALE', profitShare:0.08 }
+};
+const SUB_DURATION_MS = 30*24*60*60*1000; // 30 days
+
 /* ===== STATE ===== */
 let wallet = null;
 let walletProvider = null;
@@ -619,6 +638,92 @@ let scanSort = 'trending';
 let chartToken = null;
 let swapHistory = JSON.parse(localStorage.getItem('omni_history') || '[]');
 let swapStats = JSON.parse(localStorage.getItem('omni_stats') || '{"count":0,"volume":0}');
+let userTier = 'free';
+let userSwapCount = parseInt(localStorage.getItem('omni_swaps_used') || '0');
+let subExpiry = parseInt(localStorage.getItem('omni_sub_expiry') || '0');
+
+/* ===== TIER MANAGEMENT ===== */
+function getCurrentTier(){
+  const savedTier = localStorage.getItem('omni_tier');
+  const expiry = parseInt(localStorage.getItem('omni_sub_expiry') || '0');
+  if(savedTier && savedTier !== 'free' && Date.now() < expiry){
+    userTier = savedTier;
+  } else {
+    userTier = 'free';
+    if(savedTier && savedTier !== 'free'){
+      localStorage.setItem('omni_tier','free');
+      toast('Your subscription has expired! Renew to keep trading.','error');
+    }
+  }
+  return userTier;
+}
+
+function getFeeBps(){
+  return TIERS[getCurrentTier()].feeBps;
+}
+
+function canSwap(){
+  const tier = getCurrentTier();
+  if(tier !== 'free') return true;
+  if(userSwapCount < TIERS.free.maxFreeSwaps) return true;
+  return false;
+}
+
+function canAccessFeature(feature){
+  const tier = getCurrentTier();
+  if(feature === 'scanner') return tier !== 'free' || userSwapCount < 3;
+  if(feature === 'charts') return tier !== 'free';
+  if(feature === 'bots') return tier !== 'free';
+  return true;
+}
+
+function showPaywall(feature){
+  const overlay = document.getElementById('paywallOverlay');
+  const remaining = Math.max(0, TIERS.free.maxFreeSwaps - userSwapCount);
+  document.getElementById('paywallContent').innerHTML = `
+    <div style="font-size:48px;margin-bottom:16px;">&#128274;</div>
+    <h3 style="font-size:22px;font-weight:900;margin-bottom:8px;">Upgrade Required</h3>
+    <p style="color:var(--dim);margin-bottom:20px;font-size:14px;">
+      ${feature === 'swap'
+        ? `You've used all ${TIERS.free.maxFreeSwaps} free swaps. Subscribe to keep trading.`
+        : `${feature.charAt(0).toUpperCase()+feature.slice(1)} is a Pro feature. Subscribe to unlock.`}
+    </p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button onclick="subscribe('pro')" style="padding:14px 28px;border-radius:12px;font-weight:800;font-size:14px;
+        background:linear-gradient(135deg,var(--accent),#00cc66);color:#000;border:none;cursor:pointer;">
+        PRO - 0.1 SOL/mo
+      </button>
+      <button onclick="subscribe('whale')" style="padding:14px 28px;border-radius:12px;font-weight:800;font-size:14px;
+        background:linear-gradient(135deg,var(--purple),#6622cc);color:#fff;border:none;cursor:pointer;">
+        WHALE - 0.5 SOL/mo
+      </button>
+    </div>
+    <button onclick="closePaywall()" style="margin-top:16px;color:var(--dim);font-size:12px;background:none;border:none;cursor:pointer;">Maybe later</button>
+  `;
+  overlay.classList.add('open');
+}
+
+function closePaywall(){ document.getElementById('paywallOverlay').classList.remove('open'); }
+
+function updateTierBadge(){
+  const tier = getCurrentTier();
+  const badge = document.getElementById('tierBadge');
+  if(!badge) return;
+  const remaining = Math.max(0, TIERS.free.maxFreeSwaps - userSwapCount);
+  if(tier === 'free'){
+    badge.innerHTML = `FREE <span style="opacity:0.7">(${remaining} swaps left)</span>`;
+    badge.style.background = 'var(--dim2)';
+    badge.style.color = 'var(--dim)';
+  } else if(tier === 'pro'){
+    badge.innerHTML = 'PRO &#9889;';
+    badge.style.background = 'var(--accent-dim)';
+    badge.style.color = 'var(--accent)';
+  } else {
+    badge.innerHTML = 'WHALE &#128011;';
+    badge.style.background = 'var(--purple-dim)';
+    badge.style.color = 'var(--purple)';
+  }
+}
 
 /* ===== CONNECTION ===== */
 function getConn() { return new solanaWeb3.Connection(RPC, 'confirmed'); }
@@ -838,7 +943,8 @@ async function fetchQuote(amt){
   try{
     const decimals=inputToken.decimals||9;
     const rawAmt=Math.round(parseFloat(amt)*Math.pow(10,decimals));
-    const url=`https://api.jup.ag/swap/v1/quote?inputMint=${inputToken.mint}&outputMint=${outputToken.mint}&amount=${rawAmt}&slippageBps=${slippageBps}&platformFeeBps=50`;
+    const feeBps=getFeeBps();
+    const url=`https://api.jup.ag/swap/v1/quote?inputMint=${inputToken.mint}&outputMint=${outputToken.mint}&amount=${rawAmt}&slippageBps=${slippageBps}&platformFeeBps=${feeBps}`;
     const r=await fetch(url);
     const q=await r.json();
     if(q.error){document.getElementById('outputAmt').value='Error';currentQuote=null;return;}
@@ -852,13 +958,16 @@ async function fetchQuote(amt){
     const rate=(outAmt/parseFloat(amt));
     const impact=q.priceImpactPct?parseFloat(q.priceImpactPct).toFixed(3):'<0.001';
     const minOut=parseInt(q.otherAmountThreshold||0)/Math.pow(10,outDec);
-    const feeAmt=outAmt*0.005;
+    const feePct=feeBps/100;
+    const feeAmt=outAmt*(feeBps/10000);
+    const tierLabel=getCurrentTier().toUpperCase();
     info.innerHTML=`
       <div class="row"><span>Rate</span><span class="val">1 ${inputToken.symbol} = ${rate<0.001?rate.toPrecision(4):rate.toFixed(6)} ${outputToken.symbol}</span></div>
       <div class="row"><span>Price Impact</span><span class="val" style="color:${parseFloat(impact)>1?'var(--red)':'var(--green)'}">${impact}%</span></div>
       <div class="row"><span>Min Received</span><span class="val">${minOut<0.001?minOut.toPrecision(4):minOut.toFixed(6)} ${outputToken.symbol}</span></div>
-      <div class="row"><span>Platform Fee</span><span class="val">0.5% (~${feeAmt<0.001?feeAmt.toPrecision(3):feeAmt.toFixed(4)} ${outputToken.symbol})</span></div>
+      <div class="row"><span>Platform Fee (${tierLabel})</span><span class="val">${feePct}% (~${feeAmt<0.001?feeAmt.toPrecision(3):feeAmt.toFixed(4)} ${outputToken.symbol})</span></div>
       <div class="row"><span>Network Fee</span><span class="val" style="color:var(--accent);">Optimized (local market)</span></div>
+      ${userTier==='free'?'<div class="row" style="color:var(--accent);"><span>Upgrade to Pro</span><span class="val" style="cursor:pointer;text-decoration:underline;" onclick="switchTab(\'bots\')">Save 50% on fees &rarr;</span></div>':''}
     `;
     // Auto-refresh
     clearTimeout(quoteTimer);
@@ -872,6 +981,7 @@ async function fetchQuote(amt){
 async function executeSwap(){
   if(!wallet){openWalletModal();return;}
   if(!currentQuote){toast('Enter an amount first','info');return;}
+  if(!canSwap()){showPaywall('swap');return;}
   const btn=document.getElementById('swapBtn');
   btn.textContent='Swapping...';
   btn.className='swap-btn disabled';
@@ -921,6 +1031,10 @@ async function executeSwap(){
       sig=await conn.sendRawTransaction(signed.serialize());
     }
     toast(`Swap successful! <a href="https://solscan.io/tx/${sig}" target="_blank" style="color:inherit;text-decoration:underline;">View on Solscan</a>`,'success');
+    // Count swap for free tier enforcement
+    userSwapCount++;
+    localStorage.setItem('omni_swaps_used', userSwapCount.toString());
+    updateTierBadge();
     // Track
     const inAmt=document.getElementById('inputAmt').value;
     const outAmt=document.getElementById('outputAmt').value;
@@ -1268,29 +1382,75 @@ function quickSell(pct){
   toast('Set amount and swap to sell','info');
 }
 
-/* ===== SUBSCRIPTION ===== */
+/* ===== SUBSCRIPTION (REAL SOL PAYMENT) ===== */
 async function subscribe(tier){
   if(!wallet){openWalletModal();return;}
   const amounts={pro:0.1,whale:0.5};
   const amt=amounts[tier];
   if(!amt) return;
+  const btn=event?.target;
+  if(btn){btn.textContent='Processing...';btn.disabled=true;}
   try{
     const conn=getConn();
     const from=new solanaWeb3.PublicKey(wallet);
     const to=new solanaWeb3.PublicKey(FEE_WALLET);
+    // Create SOL transfer transaction
     const tx=new solanaWeb3.Transaction().add(
       solanaWeb3.SystemProgram.transfer({fromPubkey:from,toPubkey:to,lamports:Math.round(amt*LAMPORTS)})
     );
     tx.feePayer=from;
-    tx.recentBlockhash=(await conn.getLatestBlockhash()).blockhash;
-    const signed=await walletProvider.signTransaction(tx);
-    const sig=await conn.sendRawTransaction(signed.serialize());
-    toast(`Subscribed to ${tier.toUpperCase()}! Tx: ${sig.slice(0,8)}...`,'success');
+    const {blockhash,lastValidBlockHeight}=await conn.getLatestBlockhash('confirmed');
+    tx.recentBlockhash=blockhash;
+    // Sign and send
+    let sig;
+    if(walletProvider.signAndSendTransaction){
+      const result=await walletProvider.signAndSendTransaction(tx);
+      sig=result.signature||result;
+    }else{
+      const signed=await walletProvider.signTransaction(tx);
+      sig=await conn.sendRawTransaction(signed.serialize());
+    }
+    // Confirm transaction
+    toast('Payment sent! Confirming...','info');
+    await conn.confirmTransaction({signature:sig,blockhash,lastValidBlockHeight},'confirmed');
+    // Activate subscription
+    const expiry=Date.now()+SUB_DURATION_MS;
     localStorage.setItem('omni_tier',tier);
-    localStorage.setItem('omni_tier_ts',Date.now().toString());
+    localStorage.setItem('omni_sub_expiry',expiry.toString());
+    localStorage.setItem('omni_sub_sig',sig);
+    localStorage.setItem('omni_sub_wallet',wallet);
+    userTier=tier;
+    subExpiry=expiry;
+    // Reset swap count for paid users
+    userSwapCount=0;
+    localStorage.setItem('omni_swaps_used','0');
+    closePaywall();
+    updateTierBadge();
+    const daysLeft=30;
+    toast(`${tier.toUpperCase()} activated! ${daysLeft} days remaining. <a href="https://solscan.io/tx/${sig}" target="_blank" style="color:inherit;text-decoration:underline;">View tx</a>`,'success');
+    // Record payment for tracking
+    let payments=JSON.parse(localStorage.getItem('omni_payments')||'[]');
+    payments.push({tier,amount:amt,sig,wallet,time:Date.now(),expiry});
+    localStorage.setItem('omni_payments',JSON.stringify(payments));
   }catch(e){
-    toast('Subscription failed: '+e.message,'error');
+    toast('Payment failed: '+(e.message||e),'error');
   }
+  if(btn){btn.textContent=tier==='pro'?'PRO - 0.1 SOL/mo':'WHALE - 0.5 SOL/mo';btn.disabled=false;}
+}
+
+/* ===== VERIFY SUBSCRIPTION ON-CHAIN ===== */
+async function verifySubscription(){
+  if(!wallet) return;
+  const savedWallet=localStorage.getItem('omni_sub_wallet');
+  // If wallet changed, invalidate sub
+  if(savedWallet && savedWallet !== wallet){
+    localStorage.setItem('omni_tier','free');
+    localStorage.removeItem('omni_sub_expiry');
+    userTier='free';
+    toast('Subscription tied to different wallet','error');
+  }
+  getCurrentTier();
+  updateTierBadge();
 }
 
 /* ===== BOT FEED ===== */
@@ -1317,6 +1477,10 @@ function generateBotFeed(){
 
 /* ===== TAB SWITCHING ===== */
 function switchTab(tab){
+  // Gate premium features
+  if(tab==='charts' && !canAccessFeature('charts')){showPaywall('charts');return;}
+  if(tab==='scanner' && !canAccessFeature('scanner')){showPaywall('scanner');return;}
+  // Bots tab always accessible (it shows pricing)
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.sidebar .s-item').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
@@ -1359,9 +1523,15 @@ document.addEventListener('keydown',e=>{
 async function init(){
   fetchSolPrice();
   setInterval(fetchSolPrice,30000);
+  getCurrentTier();
+  updateTierBadge();
   eagerConnect();
-  // Pre-load scanner in background
-  setTimeout(()=>loadScanner(),2000);
+  // Pre-load scanner in background only for paid users
+  if(canAccessFeature('scanner')) setTimeout(()=>loadScanner(),2000);
+  // Verify subscription on wallet connect
+  setTimeout(()=>verifySubscription(),3000);
+  // Check subscription daily
+  setInterval(()=>{getCurrentTier();updateTierBadge();},60000);
 }
 init();
 </script>
