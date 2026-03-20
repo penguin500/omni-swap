@@ -78,7 +78,7 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
 .s-tier{font-size:9px;color:var(--dim);font-weight:700;text-align:center;letter-spacing:1px;margin-bottom:8px;}
 
 /* MAIN */
-.main{margin-left:var(--sidebar-w);margin-top:calc(var(--topbar-h) + 32px);min-height:calc(100vh - var(--topbar-h) - 32px);padding:24px;position:relative;z-index:1;}
+.main{margin-left:var(--sidebar-w);margin-top:calc(var(--topbar-h) + 36px);min-height:calc(100vh - var(--topbar-h) - 36px);padding:24px;position:relative;z-index:1;}
 .tab-content{display:none;animation:fadeIn .3s ease;}
 .tab-content.active{display:block;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
@@ -326,18 +326,18 @@ input{font-family:inherit;color:var(--text);background:transparent;border:none;o
 }
 
 /* LIVE TICKER BAR */
-.ticker-bar{position:fixed;top:var(--topbar-h);left:var(--sidebar-w);right:0;height:32px;
-  background:var(--bg2);border-bottom:1px solid var(--border);z-index:85;overflow:hidden;}
+.ticker-bar{position:fixed;top:var(--topbar-h);left:var(--sidebar-w);right:0;height:36px;
+  background:linear-gradient(90deg,var(--bg2),#0d0d18,var(--bg2));border-bottom:1px solid var(--accent-dim);z-index:85;overflow:hidden;display:flex !important;align-items:center;}
 .ticker-track{display:flex;gap:32px;align-items:center;height:100%;animation:tickerScroll 60s linear infinite;white-space:nowrap;padding-left:100%;}
 .ticker-track:hover{animation-play-state:paused;}
 @keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.ticker-item{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;flex-shrink:0;}
-.ticker-item .t-sym{color:var(--text);font-weight:700;}
-.ticker-item .t-price{color:var(--text2);}
-.ticker-item .t-change{font-weight:700;font-size:10px;padding:2px 6px;border-radius:4px;}
-.ticker-item .t-change.up{color:var(--green);background:rgba(20,241,149,0.1);}
-.ticker-item .t-change.down{color:var(--red);background:rgba(255,68,102,0.1);}
-.ticker-item .t-dot{width:3px;height:3px;border-radius:50%;background:var(--dim2);}
+.ticker-item{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;flex-shrink:0;}
+.ticker-item .t-sym{color:var(--accent);font-weight:800;font-size:12px;}
+.ticker-item .t-price{color:var(--text);font-weight:600;}
+.ticker-item .t-change{font-weight:700;font-size:11px;padding:2px 8px;border-radius:4px;}
+.ticker-item .t-change.up{color:var(--green);background:rgba(20,241,149,0.15);}
+.ticker-item .t-change.down{color:var(--red);background:rgba(255,68,102,0.15);}
+.ticker-item .t-dot{width:4px;height:4px;border-radius:50%;background:var(--dim);}
 
 /* MARKETS TAB */
 .markets-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
@@ -1693,35 +1693,38 @@ document.addEventListener('keydown',e=>{
 /* ===== LIVE TICKER ===== */
 let tickerData = [];
 async function loadTicker(){
+  // Immediately show fallback ticker while API loads
+  const fallbackData=[
+    {symbol:'BTC',price:97850,change24h:2.4},{symbol:'ETH',price:3420,change24h:1.8},
+    {symbol:'SOL',price:solPrice||135,change24h:3.2},{symbol:'BNB',price:612,change24h:0.9},
+    {symbol:'XRP',price:2.35,change24h:1.5},{symbol:'ADA',price:0.98,change24h:2.1},
+    {symbol:'DOGE',price:0.185,change24h:4.2},{symbol:'AVAX',price:38.50,change24h:2.7},
+    {symbol:'DOT',price:7.82,change24h:1.3},{symbol:'LINK',price:18.40,change24h:3.5},
+    {symbol:'JUP',price:1.12,change24h:5.1},{symbol:'BONK',price:0.0000285,change24h:8.3},
+    {symbol:'WIF',price:2.45,change24h:6.2},{symbol:'RAY',price:4.80,change24h:3.8},
+    {symbol:'JITO',price:3.95,change24h:2.9},{symbol:'RENDER',price:8.20,change24h:4.1},
+    {symbol:'SPY',price:542.18,change24h:0.8},{symbol:'QQQ',price:478.65,change24h:1.2},
+    {symbol:'NVDA',price:875.50,change24h:3.4},{symbol:'TSLA',price:248.30,change24h:2.1},
+    {symbol:'AAPL',price:198.45,change24h:0.5},{symbol:'MSFT',price:425.20,change24h:0.3},
+    {symbol:'AMZN',price:186.70,change24h:0.9},{symbol:'META',price:505.40,change24h:1.5},
+    {symbol:'AMD',price:162.80,change24h:2.8},{symbol:'COIN',price:265.30,change24h:3.2},
+  ];
+  renderTicker(fallbackData);
+  // Then try to get live data
   try{
-    // Fetch top crypto from CoinGecko
     const r=await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=30&page=1&sparkline=false&price_change_percentage=1h,24h');
-    const coins=await r.json();
-    tickerData=coins.map(c=>({
-      symbol:c.symbol.toUpperCase(),name:c.name,price:c.current_price,
-      change24h:c.price_change_percentage_24h||0,
-      change1h:c.price_change_percentage_1h_in_currency||0,
-      icon:c.image,mc:c.market_cap
-    }));
-    // Add some stock tickers (simulated from cached data)
-    const stocks=[
-      {symbol:'SPY',name:'S&P 500',price:542.18,change24h:0.8},
-      {symbol:'QQQ',name:'Nasdaq 100',price:478.65,change24h:1.2},
-      {symbol:'AAPL',name:'Apple',price:198.45,change24h:0.5},
-      {symbol:'TSLA',name:'Tesla',price:248.30,change24h:2.1},
-      {symbol:'NVDA',name:'NVIDIA',price:875.50,change24h:3.4},
-      {symbol:'MSFT',name:'Microsoft',price:425.20,change24h:0.3},
-      {symbol:'AMZN',name:'Amazon',price:186.70,change24h:0.9},
-      {symbol:'GOOGL',name:'Google',price:175.30,change24h:0.6},
-      {symbol:'META',name:'Meta',price:505.40,change24h:1.5},
-      {symbol:'AMD',name:'AMD',price:162.80,change24h:2.8},
-    ];
-    renderTicker([...tickerData,...stocks]);
-  }catch(e){
-    console.warn('Ticker load failed',e);
-    // Fallback with just SOL price
-    renderTicker([{symbol:'SOL',name:'Solana',price:solPrice,change24h:0}]);
-  }
+    if(r.ok){
+      const coins=await r.json();
+      if(Array.isArray(coins)&&coins.length>0){
+        tickerData=coins.map(c=>({
+          symbol:c.symbol.toUpperCase(),price:c.current_price,
+          change24h:c.price_change_percentage_24h||0
+        }));
+        const stocks=fallbackData.filter(t=>['SPY','QQQ','NVDA','TSLA','AAPL','MSFT','AMZN','META','AMD','COIN'].includes(t.symbol));
+        renderTicker([...tickerData,...stocks]);
+      }
+    }
+  }catch(e){console.warn('Live ticker failed, using fallback',e);}
 }
 
 function renderTicker(items){
